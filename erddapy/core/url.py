@@ -428,3 +428,37 @@ def get_download_url(
 
     url = _distinct(url, **kwargs)
     return url
+
+
+def _extract_url_components(url: str) -> Dict:
+    """
+    Extract server, protocol, dataset_id and extension from an URL.
+
+    Returns a dictionary with the following keys:
+        ['server', 'protocol', 'dataset_id', 'extension', 'extra']
+    """
+    output = dict()
+    try:
+        server, dataset_id = url.split("/erddap/")
+        server += "/erddap/"
+        protocol, dataset_id = dataset_id.split("/")
+        dataset_id, extension = dataset_id.split(".")
+        if extension.endswith("?"):
+            extension, extra = extension.split("?")
+        else:
+            extra = None
+    except (TypeError, ValueError):
+        valid_url = "http://erddap.ioos.us/erddap/tabledap/raw_asset_inventory.html"
+        print("Couldn't extract values from URL.")
+        print(f"Please check the value of 'url': '{url}'.")
+        print(f"A valid URL example is: '{valid_url}'.")
+        raise
+    output = {
+        "server": server,
+        "protocol": protocol,
+        "dataset_id": dataset_id,
+        "extension": extension,
+    }
+    if extra:
+        output["extra"] = extra
+    return output
