@@ -23,32 +23,7 @@ class ERDDAPConnection:
 
     def __init__(self, server: str, auth: tuple | None = None):
         """Initialize instance of ERDDAPConnection."""
-        self._server = self.to_string(server)
-        self._auth = auth
-
-    def __repr__(self) -> str:
-        return f"<erddapy.array_like.connection.ERDDAPConnection to server '{self.server}'>"
-
-    @property
-    def auth(self) -> str:
-        return self._auth
-
-    @auth.setter
-    def auth(self, value: str):
-        self._auth = value
-
-    @classmethod
-    def to_string(cls, value):
-        """Convert an instance of ERDDAPConnection to a string."""
-        if isinstance(value, str):
-            return value.rstrip("/")
-        elif isinstance(value, cls):
-            return value.server.rstrip("/")
-        else:
-            raise TypeError(
-                f"Server must be either a string or an instance of ERDDAPConnection. '{value}' was "
-                f"passed.",
-            )
+        self._server = _to_string(server)
 
     def get(self, url_part: str, **kwargs) -> StrLike:
         """
@@ -79,4 +54,17 @@ class ERDDAPConnection:
     @server.setter
     def server(self, value: str):
         """Set private ._server attribute."""
-        self._server = self.to_string(value)
+        self._server = _to_string(value)
+
+
+def _to_string(value: str | ERDDAPConnection) -> str:
+    """Convert a string or an instance of ERDDAPConnection to a string."""
+    if isinstance(value, str):
+        return value
+    elif isinstance(value, ERDDAPConnection):
+        return value.server
+    else:
+        raise TypeError(
+            f"Server must be either a string or an instance of ERDDAPConnection. '{value}' of type "
+            f"'{type(value)}' was passed.",
+        )
